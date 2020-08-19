@@ -40,6 +40,16 @@ Here is a quick view of the AWS resources.
 
 ![design](etc/design.png)
 
+## Flavors
+Here are the flavors of orchestration in this sample. 
+
+| Tool | Location |
+| ----- | ------ |
+| AWS CloudFormation | [cloudformation](cloudformation) |
+| Terraform | [terraform](terraform) |
+| AWS CDK | TBD |
+
+
 ## Development
 
 ```bash
@@ -62,3 +72,5 @@ $ make
 * Terraform state is stored locally.
 * _variable.tf_ has the values for the terraform stack. 
 
+## CICD
+TBD
