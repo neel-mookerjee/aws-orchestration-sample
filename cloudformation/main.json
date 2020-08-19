@@ -1,0 +1,160 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "CloudFormation template for creating AWS resources for this sample",
+    "Parameters": {
+        "DeployRoleARN": {
+            "Description": "ARN of the already existing deploy role",
+            "Type": "String",
+            "MinLength": "30",
+            "ConstraintDescription": "Must be an IAM role ARN"
+        }
+    },
+    "Mappings": {
+        "CommonConfigs": {
+            "All": {
+                "S3Bucket1": "homesite-takehome-test-staging-1234654",
+                "S3Bucket2": "homesite-takehome-test-raw-1234654",
+                "S3Bucket3": "homesite-takehome-test-transformed-1234654"
+            }
+        }
+    },
+    "Resources": {
+        "ServiceRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "s3.amazonaws.com",
+                                    "lambda.amazonaws.com",
+                                    "glue.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "ServiceRolePolicy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "ServiceRolePolicy",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": "s3:*",
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": "lambda:*",
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": "glue:*",
+                            "Resource": "*"
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "ServiceRole"
+                    }
+                ]
+            }
+        },
+        "NestedStack1": {
+            "Type": "AWS::CloudFormation::Stack",
+            "DependsOn": "ServiceRole",
+            "Properties": {
+                "TemplateURL": "https://s3-us-west-2.amazonaws.com/aws-orchestration-sample/cloudformation/nested.json",
+                "Parameters": {
+                    "S3BucketName": {
+                        "Fn::FindInMap": [
+                            "CommonConfigs",
+                            "All",
+                            "S3Bucket1"
+                        ]
+                    },
+                    "ServiceRoleARN": {
+                        "Fn::GetAtt": [
+                            "ServiceRole",
+                            "Arn"
+                        ]
+                    },
+                    "DeployRoleARN": {
+                        "Ref": "DeployRoleARN"
+                    }
+                }
+            }
+        },
+        "NestedStack2": {
+            "Type": "AWS::CloudFormation::Stack",
+            "DependsOn": "ServiceRole",
+            "Properties": {
+                "TemplateURL": "https://s3-us-west-2.amazonaws.com/aws-orchestration-sample/cloudformation/nested.json",
+                "Parameters": {
+                    "S3BucketName": {
+                        "Fn::FindInMap": [
+                            "CommonConfigs",
+                            "All",
+                            "S3Bucket2"
+                        ]
+                    },
+                    "ServiceRoleARN": {
+                        "Fn::GetAtt": [
+                            "ServiceRole",
+                            "Arn"
+                        ]
+                    },
+                    "DeployRoleARN": {
+                        "Ref": "DeployRoleARN"
+                    }
+                }
+            }
+        },
+        "NestedStack3": {
+            "Type": "AWS::CloudFormation::Stack",
+            "DependsOn": "ServiceRole",
+            "Properties": {
+                "TemplateURL": "https://s3-us-west-2.amazonaws.com/aws-orchestration-sample/cloudformation/nested.json",
+                "Parameters": {
+                    "S3BucketName": {
+                        "Fn::FindInMap": [
+                            "CommonConfigs",
+                            "All",
+                            "S3Bucket3"
+                        ]
+                    },
+                    "ServiceRoleARN": {
+                        "Fn::GetAtt": [
+                            "ServiceRole",
+                            "Arn"
+                        ]
+                    },
+                    "DeployRoleARN": {
+                        "Ref": "DeployRoleARN"
+                    }
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "ServiceRole": {
+            "Description": "Service Role",
+            "Value": {
+                "Ref": "ServiceRole"
+            }
+        }
+    }
+}
