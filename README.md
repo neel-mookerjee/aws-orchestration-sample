@@ -72,5 +72,29 @@ $ make
 * Terraform state is stored locally.
 * _variable.tf_ has the values for the terraform stack. 
 
+## Block Public Access to S3
+Add the following as an S3 bucket propery in the CloudFormation:
+
+```json
+"PublicAccessBlockConfiguration" : {
+    "BlockPublicAcls" : true,
+    "BlockPublicPolicy" : true,
+    "IgnorePublicAcls" : true,
+    "RestrictPublicBuckets" : true
+}
+```
+
+Terraform:
+
+```
+resource "aws_s3_bucket_public_access_block" "sample" {
+  bucket = aws_s3_bucket.sample.id
+
+  block_public_acls   = true
+  block_public_policy = true
+}
+```
+> Note: more properties can be added
+
 ## CICD
 TBD
